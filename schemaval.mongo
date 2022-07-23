@@ -1,0 +1,25 @@
+validator: {
+   $jsonSchema: {
+      bsonType: "object",
+      required: [ "username", "appPass", "pin", "isValid" ],
+      properties: {
+         username: {
+            bsonType: "string",
+            description: "must be a string and is required"
+         },
+         appPass: {
+            description: "can only be one of the enum values and is required"
+         },
+         pin: {
+            bsonType: [ "int" ],
+            description: "must be an integer if the field exists"
+         },
+         isValid: {
+            bsonType: "string",
+        }
+            }
+         }
+      }
+   }
+}
+})

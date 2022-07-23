@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
-{% block Title %}Welcome {% end block%}
+{% block Title %}Welcome {% endblock%}
 
 {% include 'nav.html' %}
 
 {% block content %}
+{{ "Hello, %s!" % name }}
 
-
-{% end block %}
-{% include 'footer.html' %}
+{% endblock %}

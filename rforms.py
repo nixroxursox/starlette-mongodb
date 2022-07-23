@@ -11,6 +11,10 @@ from starlette.templating import Jinja2Templates
 from db import dataBase
 from starlette.formparsers import FormParser as fp
 from starlette.endpoints import HTTPEndpoint
+from starlette_wtf import StarletteForm
+from wtforms import TextField, PasswordField
+from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.widgets import PasswordInput
 
 
 class checkFormData():
@@ -40,13 +44,39 @@ class checkFormData():
 
 
 def add_headers(request: Request, call_next: Callable) -> Response:
-    response = await call_next(request)
     response.headers["X-Frame-Options"] = "deny"
     response.headers["Access-Control-Allow-Origin"] = request.client.host
     response.headers[
         "Access-Control-Allow-Headers"
     ] = "cache-control,x-requested-with,content-type,authorization"
     response.headers[
-        "Access-Control-Allow-Methods"
+	    "Access-Control-Allow-Methods"
     ] = "POST, PUT, GET, OPTIONS, DELETE"
     return response
+
+
+class CreateAccountForm(StarletteForm):
+    email = TextField(
+        'Email address',
+        validators=[
+            DataRequired('Please enter your email address'),
+            Email()
+        ]
+    )
+
+    password = PasswordField(
+        'Password',
+        widget=PasswordInput(hide_value=False),
+        validators=[
+            DataRequired('Please enter your password'),
+            EqualTo('password_confirm', message='Passwords must match')
+        ]
+    )
+
+    password_confirm = PasswordField(
+        'Confirm Password',
+        widget=PasswordInput(hide_value=False),
+        validators=[
+            DataRequired('Please confirm your password')
+        ]
+    )

@@ -15,28 +15,27 @@ DATABASE_URL = config('DATABASE_URL')
 class dataBase():
     def getdb():
         try:
-            #uri1 = "mongodb+srv://btc-cluster.gghyb.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"
             uri1 = DATABASE_URL
             client = mc(uri1,tls=False)
-            return client["AUTHDB"]
+            return client["appdb"]
         except Exception as e:
             print(e)
 
-    def findUser(x):
+    def findUser(chkUser):
         try:
             db = dataBase.getdb()
-            coll = db["Userbase"]
-            userinfo = coll.find_one({'username': x})
+            coll = db["userBase"]
+            userinfo = coll.find_one({'username': chkUser})
             if userinfo:
-                return render_template('index.html', x + "exists")
+                return True
         except Exception as e:
             print(e)
 
-    def addUser(chkuser, password, pin):
+    def addUser(chkUser, password, pin):
         try:
             db = dataBase.getdb()
-            coll = db["Userbase"]
-            data = ({'username': chkuser,
+            coll = db["userBase"]
+            data = ({'username': chkUser,
                 'password': password,
                 'pin': pin,
                 'isActive': True,
@@ -51,3 +50,15 @@ class dataBase():
         except Exception as e:
             print("An exception occurred :", e)
             return False
+
+    def modUser(chkUser, password, pin):
+        try:
+            db = dataBase.getdb()
+            coll = db["userBase"]
+            data = ({'username': chkUser})
+            result = coll.find_one({'username': chkUser})
+            if result:
+                changerow = result[ObjectId]
+                coll.find_one_and_update
+        except pymongo.errors as e:
+            print(e)

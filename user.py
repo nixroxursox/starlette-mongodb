@@ -11,14 +11,15 @@ from starlette.formparsers import FormParser as fp
 from starlette_login import login_manager
 import starlette_wtf
 from starlette.endpoints import HTTPEndpoint
-from rforms import checkFormData
+import base64
 from starlette.authentication import requires
 from starlette.responses import RedirectResponse
 import os
 import binascii
 import DateTime
 import time
-
+import exceptions
+import nacl.exceptions
 templates = Jinja2Templates(directory='templates')
 
 
@@ -27,25 +28,43 @@ async def login(request):
         return templates.TemplateResponse('login.html', {'request': request})
     if request.method == "POST":
         rformsdata = await request.form()
-        chkuser = rformsdata['username']
+        chkUser = rformsdata['username']
         db = dataBase.getdb()
-        coll = db["Userbase"]
-        mtchuser = coll.find_one({'username': chkuser})
-        if mtchuser:
-            dbpass = mtchuser["password"]
-            pin = mtchuser["pin"]
-            mypass = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['password'], encoding="UTF-8"))
-            chkpin = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['pin'], encoding="UTF-8"))
-            if mypass == dbpass and chkpin ==  pin:
-                return templates.TemplateResponse('profile.html', {'request': request})
+        coll = db["userBase"]
+        mtcUser = coll.find_one({},{'username': 1, 'appPass': 1, 'pin': 1})
+        if mtcUser:
+            exception = None
+            dbpass = mtcUser["appPass"]
+            pin = mtcUser["pin"]
+            try:
+                credCheck = pwhash.verify(dbpass, bytes(rformsdata['password'], encoding="UTF-8"))
+                pincheck = pwhash.verify(pin, bytes(rformsdata['pin'], encoding="UTF-8"))
+            except:
+                e = "wrong password jackasw"
+                template = 'login.html'
+                context = {'request': request, 'data': e }
+                return templates.TemplateResponse(template, context)
+
+            if credCheck == True:
+                try:
+                    if pincheck == True:
+                        template = 'profile.html'
+                        context = {'request': request, 'name': chkUser}
+                        return templates.TemplateResponse(template, context)
+
+                except:
+                    template = '404.html'
+                    context = {'request': request, 'data': nacl.exceptions}
+                    return templates.TemplateResponse(template, context)
             else:
-                return templates.TemplateResponse('register.html', {'request': request})
+                exception = exceptions
+                print(exception)
         else:
-            password = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['password'], encoding="UTF-8"))
-            pin = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['pin'], encoding="UTF-8"))
+#            appPass = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['appPass'], encoding="UTF-8"))
+#            pin = pwhash.scryptsalsa208sha256_str(bytes(rformsdata['pin'], encoding="UTF-8"))
             print("Username not found.  Please register to create an account")
-            useradd = dataBase.addUser(chkuser, password, pin)
-            return useradd[ObjectId]
+            useradd = dataBase.addUser(chkUser, appPass, pin)
+#            return useradd[ObjectId]
 
 
 class session:
