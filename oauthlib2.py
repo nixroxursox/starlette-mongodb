@@ -18,7 +18,7 @@ class OAuth2_PasswordValidator(oauth2.RequestValidator):
     """dict of username containing password"""
     db = dataBase.getdb()
     coll = db["userBase"]
-    users_password = dataBase.findUser()
+    users_password = dataBase.getUser()
     tokens_info = {
     }
 

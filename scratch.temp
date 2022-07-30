@@ -1,0 +1,23 @@
+middleware = [
+    Middleware(CORSMiddleware, allow_origins=['*'])
+]
+
+middleware = [
+  Middleware(CORSMiddleware, allow_origins=['locahost'])
+  Middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '*.localhost']),
+  Middleware(HTTPSRedirectMiddleware),
+  Middleware(SessionMiddleware, secret_key=config("SECRET_KEY")),
+  Middleware(ContextMiddleware,
+  plugins=(
+      plugins.RequestIdPlugin(),
+      plugins.CorrelationIdPlugin(),
+      plugins.ForwardedForPlugin(),
+      plugins.UserAgentPlugin(),
+      plugins.ApiKeyPlugin()
+  ),
+ )
+]
+
+
+<link href="{{ url_for('style', path='/fa/css/fontawesome.css') }}" rel="stylesheet">
+<link href="{{ url_for('style', path='/fa/css/bootstrap.min.css') }}" rel="stylesheet">
